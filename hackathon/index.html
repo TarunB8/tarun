@@ -1,1 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #4b38a1;
+      background-image: url('https://wallpapercave.com/wp/wp9764093.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .login-box {
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px 40px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      position: relative;
+    }
+    .login-title {
+      font-size: 24px;
+      color: #8c0002;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .input-group label {
+      font-size: 14px;
+      color: #333;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 5px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .forgot-password, .forgot-userid {
+      display: block;
+      font-size: 12px;
+      color: #333;
+      text-align: left;
+      margin-top: 5px;
+      text-decoration: none;
+    }
+    .forgot-password:hover, .forgot-userid:hover {
+      text-decoration: underline;
+    }
+    .sign-in-button, .register-button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .sign-in-button {
+      background-color: red;
+      color: white;
+    }
+    .sign-in-button:hover {
+      background-color: darkred;
+    }
+    .register-button {
+      background-color: rgb(36, 36, 202);
+      color: white;
+    }
+    .register-button:hover {
+      background-color: rgb(43, 43, 127);
+    }
+    .help-link {
+      display: block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: black;
+      text-decoration: none;
+    }
+    .help-link:hover {
+      text-decoration: underline;
+    }
 
+    /* Forgot links positioning */
+    .forgot-links-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 12px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <h1 class="login-title">Login</h1>
+
+      <!-- Login Form -->
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="userid">User Id</label>
+          <input type="text" id="userid" placeholder="Enter your user id">
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password">
+        </div>
+
+        <!-- Forgot links positioned on left and right -->
+      <div class="forgot-links-container">
+        <a href="forgotuserid.html" class="forgot-userid">Forgot User ID?</a>
+        <a href="forgotpass.html" class="forgot-password">Forgot password?</a>
+      </div>
+      
+        <button type="submit" class="sign-in-button">Sign In</button>
+      </form>
+
+      <a href="newuser.html">
+        <button type="button" class="register-button">Register</button>
+      </a>
+
+      <a href="help.html" class="help-link">Help</a>
+    </div>
+  </div>
+
+  <script>
+    async function loginUser(event) {
+        event.preventDefault(); // Prevents form from auto-submitting
+
+        const userid = document.getElementById("userid").value;
+        const password = document.getElementById("password").value;
+
+        if (!userid || !password) {
+            alert("❌ Please enter User ID and Password!");
+            return;
+        }
+
+        const response = await fetch("http://localhost:5000/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userid, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem("userid", data.user.userid);
+            alert("✅ Login Successful!");
+            window.location.href = "welcome.html"; // Redirect to Welcome Page
+        } else {
+            alert("❌ " + data.error);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("loginForm").addEventListener("submit", loginUser);
+    });
+
+
+
+    async function fetchUnreadCount() {
+    const userId = localStorage.getItem("userid");
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`http://localhost:5000/unread-notifications/${userId}`);
+        const data = await response.json();
+
+        const notifBadge = document.getElementById("notifCount");
+        if (data.unreadCount > 0) {
+            notifBadge.innerText = `(${data.unreadCount})`; // Show count
+            notifBadge.style.color = "red";
+        } else {
+            notifBadge.innerText = ""; // Hide if no unread notifications
+        }
+    } catch (error) {
+        console.error("❌ Error fetching unread count:", error);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", fetchUnreadCount);
+
+
+  </script>
+
+</body>
+</html>
